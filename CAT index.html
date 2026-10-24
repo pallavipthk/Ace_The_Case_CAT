@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAT Prep AI – Mock analysis, error log and daily study plan</title>
+<meta name="description" content="Analyse CAT mock tests, find weak areas, track recurring mistakes and get a daily study plan. Data stays in your browser.">
+<style>
+:root{--navy:#0f1b3d;--blue:#2563eb;--blue-l:#e8effe;--bg:#f5f7fb;--mut:#5b6478;--line:#e3e8f1;--ok:#15803d;--bad:#b91c1c;--warn:#b45309;--sh:0 1px 2px rgba(15,27,61,.06),0 10px 28px rgba(15,27,61,.07)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;color:var(--navy);background:var(--bg)}
+h1,h2,h3{line-height:1.2;margin:0 0 .5rem;letter-spacing:-.02em}h2{font-size:1.5rem}h3{font-size:1.1rem}p{margin:0 0 .75rem}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #93b4ff;outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:1px solid var(--line);background:#fff;border-radius:12px;padding:.6rem 1.1rem;font-weight:600;cursor:pointer;transition:transform .15s,box-shadow .15s,background .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--sh)}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}.btn.pri:hover{background:#1d4ed8}
+.btn.lg{padding:.9rem 1.8rem;font-size:1.1rem;border-radius:14px}.btn.sm{padding:.3rem .7rem;font-size:.85rem}.btn.dng{color:var(--bad)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 1.1rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:1.25rem;margin-bottom:1.1rem}
+.grid{display:grid;gap:1rem}.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.mut{color:var(--mut)}.tag{display:inline-block;background:#fef3c7;color:#92400e;border-radius:99px;padding:.05rem .6rem;font-size:.75rem;font-weight:600}
+/* landing */
+#landing header,#app>header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:1rem;padding-bottom:1rem}
+.logo{font-weight:800;font-size:1.2rem;background:none;border:0;cursor:pointer;padding:0}.logo b{color:var(--blue)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:2rem;align-items:center;padding:3rem 0}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);letter-spacing:-.035em}.hero p.lead{font-size:1.15rem;color:var(--mut);max-width:34em}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;padding-bottom:2rem}
+.fade{animation:up .6s ease both}@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+/* app */
+#app>header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+nav{display:flex;gap:.25rem;overflow-x:auto;padding-bottom:.5rem}
+nav button{border:0;background:none;padding:.5rem .9rem;border-radius:10px;font-weight:600;color:var(--mut);cursor:pointer;white-space:nowrap}
+nav button:hover{background:var(--bg)}nav button[aria-current=page]{background:var(--blue-l);color:var(--blue)}
+main{padding:1.5rem 0 3rem}.view[hidden]{display:none}
+.stat{font-size:2rem;font-weight:800;letter-spacing:-.03em}.stat small{font-size:1rem;color:var(--mut);font-weight:500}
+.q{text-align:left;cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:18px;padding:1.1rem;box-shadow:var(--sh);transition:transform .2s,border-color .2s}.q:hover{transform:translateY(-3px);border-color:var(--blue)}
+.bar{height:12px;background:#e9eef7;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue);border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)}.bar i.low{background:#f59e0b}
+.row{display:grid;grid-template-columns:90px 1fr 90px;gap:.7rem;align-items:center;margin:.6rem 0}
+label{display:block;font-weight:600;font-size:.92rem;margin-bottom:.2rem}
+input,select,textarea{width:100%;padding:.6rem .75rem;border:1px solid #cbd5e6;border-radius:10px;background:#fff}
+input[aria-invalid=true],select[aria-invalid=true]{border-color:var(--bad)}
+.err{color:var(--bad);font-size:.83rem;min-height:1.1em;display:block}
+.tip{display:inline-grid;place-items:center;width:1.1rem;height:1.1rem;border-radius:50%;background:var(--blue-l);color:var(--blue);font-size:.72rem;font-weight:700;position:relative;cursor:help;margin-left:.25rem}
+.tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;left:50%;bottom:130%;transform:translateX(-50%);width:210px;background:var(--navy);color:#fff;padding:.5rem .6rem;border-radius:8px;font-weight:400;font-size:.8rem;z-index:5;line-height:1.4}
+.total{background:var(--blue-l);border-radius:12px;padding:.7rem 1rem;font-weight:700}
+.note{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:.7rem 1rem;font-size:.9rem;margin-bottom:1rem}
+.empty{text-align:center;padding:1.5rem;color:var(--mut);border:2px dashed var(--line);border-radius:14px}
+.task{display:flex;gap:.8rem;align-items:flex-start;padding:.8rem;border:1px solid var(--line);border-radius:14px;margin-bottom:.6rem;transition:background .2s}
+.task input{width:1.3rem;height:1.3rem;margin-top:.2rem;flex:none}.task.done{background:#f0fdf4}.task.done .t{text-decoration:line-through;color:var(--mut)}
+.item{display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;padding:.8rem 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}
+.acts{display:flex;gap:.4rem;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:.92rem}th,td{text-align:left;padding:.5rem;border-bottom:1px solid var(--line)}.sc{overflow-x:auto}
+.chartbox{position:relative}.chartbox svg{width:100%;height:auto}.pt{cursor:pointer}.pt:hover,.pt:focus{r:7}
+#ctip{position:absolute;pointer-events:none;background:var(--navy);color:#fff;padding:.4rem .6rem;border-radius:8px;font-size:.8rem;display:none;white-space:nowrap;z-index:3}
+.leg{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}.leg button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:.25rem .8rem;cursor:pointer;font-weight:600;font-size:.85rem}.leg button[aria-pressed=false]{opacity:.45}
+#toast{position:fixed;left:50%;bottom:1.2rem;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:.7rem 1.2rem;border-radius:12px;opacity:0;transition:.3s;z-index:50;pointer-events:none;max-width:90vw}#toast.on{opacity:1;transform:translate(-50%,0)}
+ul.rec{padding-left:1.2rem;margin:.3rem 0}ul.rec li{margin-bottom:.4rem}
+@media(max-width:760px){.hero{grid-template-columns:1fr;padding:1.5rem 0}.row{grid-template-columns:70px 1fr 70px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div id="landing">
+  <header class="wrap"><span class="logo">CAT Prep <b>AI</b></span><button class="btn" data-act="start">Open dashboard</button></header>
+  <div class="wrap">
+    <section class="hero fade" aria-labelledby="h1">
+      <div>
+        <h1 id="h1">Your mock score is just the beginning</h1>
+        <p class="lead">CAT Prep AI turns each mock into a clear picture of where marks leak. Log your sectional scores, record the mistakes behind them, and get a daily plan that fits the hours you actually have.</p>
+        <button class="btn pri lg" data-act="start">Get Started</button>
+        <p class="mut" style="margin-top:1rem;font-size:.9rem">Free, private and offline: your data stays in this browser.</p>
+      </div>
+      <div class="card" aria-label="Illustrative preview">
+        <span class="tag">Illustrative sample, not real data</span>
+        <h3 style="margin-top:.6rem">Mock 4 · 118 / 198</h3>
+        <div class="row"><span>VARC</span><div class="bar"><i style="width:63%"></i></div><b>45/72</b></div>
+        <div class="row"><span>DILR</span><div class="bar"><i class="low" style="width:42%"></i></div><b>28/66</b></div>
+        <div class="row"><span>Quant</span><div class="bar"><i style="width:75%"></i></div><b>45/60</b></div>
+        <p class="mut" style="margin:0;font-size:.9rem">Lowest section: DILR. Next step: untimed re-solve of missed sets.</p>
+      </div>
+    </section>
+    <section class="feat" aria-label="Features">
+      <div class="card"><h3>Mock analysis</h3><p class="mut">Sectional breakdown, your weakest section and specific next steps.</p></div>
+      <div class="card"><h3>Error log</h3><p class="mut">Tag every mistake by cause so patterns show up fast.</p></div>
+      <div class="card"><h3>Daily plan</h3><p class="mut">Your study hours split across VARC, DILR, Quant and error revision.</p></div>
+      <div class="card"><h3>Progress tracker</h3><p class="mut">Compare mocks and watch score and error trends over time.</p></div>
+    </section>
+    <p class="mut" style="font-size:.85rem;padding-bottom:2rem">CAT Prep AI is a self-review aid. Section scores alone cannot diagnose every mistake or predict a CAT percentile.</p>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header><div class="wrap"><button class="logo" data-act="home" aria-label="Back to landing page">CAT Prep <b>AI</b></button>
+  <nav aria-label="Main"><button data-view="dash">Dashboard</button><button data-view="analysis">Mock Analysis</button><button data-view="plan">Daily Study Plan</button><button data-view="errors">Error Log</button><button data-view="progress">Progress Tracker</button></nav></div></header>
+  <main class="wrap" id="main" tabindex="-1">
+
+  <section class="view" id="v-dash" aria-labelledby="t-dash">
+    <h2 id="t-dash">Welcome back, aspirant</h2>
+    <div id="demoNote"></div>
+    <div class="grid g4" id="stats"></div>
+    <h3 style="margin-top:1.4rem">Quick access</h3>
+    <div class="grid g4">
+      <button class="q" data-view="analysis"><b>Mock Analysis</b><br><span class="mut">Add a mock and see weak spots</span></button>
+      <button class="q" data-view="plan"><b>Daily Study Plan</b><br><span class="mut">Today's tasks for your hours</span></button>
+      <button class="q" data-view="errors"><b>Error Log</b><br><span class="mut">Record and review mistakes</span></button>
+      <button class="q" data-view="progress"><b>Progress Tracker</b><br><span class="mut">Trends and comparisons</span></button>
+    </div>
+    <div class="card" style="margin-top:1.4rem"><h3>Your data</h3>
+      <p class="mut">Everything is stored only in this browser. Demo records are illustrative, not real results.</p>
+      <div class="acts"><button class="btn" data-act="resetDemo">Reset demo data</button><button class="btn dng" data-act="clearAll">Clear all data</button></div></div>
+  </section>
+
+  <section class="view" id="v-analysis" hidden aria-labelledby="t-an">
+    <h2 id="t-an">Mock Analysis</h2>
+    <div class="grid g2" style="align-items:start">
+      <form class="card" id="mockForm" novalidate>
+        <h3 id="mfTitle">Add a mock</h3><input type="hidden" id="f-id">
+        <div><label for="f-name">Mock name</label><input id="f-name" maxlength="60" placeholder="e.g. Mock 5"><span class="err" id="e-name" aria-live="polite"></span></div>
+        <div><label for="f-date">Test date</label><input id="f-date" type="date"><span class="err" id="e-date" aria-live="polite"></span></div>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:.6rem">
+          <div><label for="f-varc">VARC /72</label><input id="f-varc" type="number" inputmode="numeric" step="1"><span class="err" id="e-varc"></span></div>
+          <div><label for="f-dilr">DILR /66</label><input id="f-dilr" type="number" inputmode="numeric" step="1"><span class="err" id="e-dilr"></span></div>
+          <div><label for="f-quant">Quant /60</label><input id="f-quant" type="number" inputmode="numeric" step="1"><span class="err" id="e-quant"></span></div>
+        </div>
+        <div class="total" aria-live="polite">Total: <span id="f-total">0</span> / 198</div>
+        <div style="margin-top:.6rem"><label for="f-chal">Biggest challenge<span class="tip" tabindex="0" data-tip="Pick what hurt you most in this mock. It shapes your recommendations and study plan.">?</span></label>
+          <select id="f-chal"><option value="">Select…</option><option value="time">Time management</option><option value="acc">Careless errors</option><option value="concept">Weak concepts</option><option value="select">Choosing the wrong questions or sets</option><option value="rc">Reading speed and RC comprehension</option><option value="stress">Staying calm under pressure</option></select><span class="err" id="e-chal"></span></div>
+        <div><label for="f-hours">Study hours per day<span class="tip" tabindex="0" data-tip="Hours you can realistically study on a normal day, from 0.5 to 12.">?</span></label><input id="f-hours" type="number" step="0.5" min="0.5" max="12"><span class="err" id="e-hours"></span></div>
+        <div class="acts"><button class="btn pri" type="submit" id="mfSave">Save and analyse</button><button class="btn" type="button" id="mfCancel" hidden>Cancel edit</button></div>
+      </form>
+      <div id="result"></div>
+    </div>
+    <div class="card"><h3>Saved mocks</h3><div id="mockList"></div></div>
+  </section>
+
+  <section class="view" id="v-plan" hidden aria-labelledby="t-pl"><h2 id="t-pl">Daily Study Plan</h2><div id="planBox"></div></section>
+
+  <section class="view" id="v-errors" hidden aria-labelledby="t-er">
+    <h2 id="t-er">Error Log</h2>
+    <div class="grid g2" style="align-items:start">
+      <form class="card" id="errForm" novalidate><h3>Log a mistake</h3>
+        <div><label for="x-q">Question number</label><input id="x-q" type="number" min="1" max="100" step="1"><span class="err" id="e-xq"></span></div>
+        <div><label for="x-sec">Section</label><select id="x-sec"><option value="">Select…</option><option value="varc">VARC</option><option value="dilr">DILR</option><option value="quant">Quant</option></select><span class="err" id="e-xsec"></span></div>
+        <div><label for="x-topic">Topic</label><input id="x-topic" maxlength="50" placeholder="e.g. Parajumbles, Geometry"><span class="err" id="e-xtopic"></span></div>
+        <div><label for="x-cat">Error category<span class="tip" tabindex="0" data-tip="Choose the main cause. Concept gap: didn't know the method. Poor selection: wrong question to attempt.">?</span></label><select id="x-cat"><option value="">Select…</option></select><span class="err" id="e-xcat"></span></div>
+        <div><label for="x-time">Time spent (minutes)</label><input id="x-time" type="number" min="0" max="60" step="0.5"><span class="err" id="e-xtime"></span></div>
+        <div><label for="x-act">Corrective action</label><textarea id="x-act" rows="2" maxlength="200" placeholder="What will you do so this doesn't repeat?"></textarea><span class="err" id="e-xact"></span></div>
+        <button class="btn pri" type="submit">Add to error log</button></form>
+      <div class="card"><h3>Error categories</h3><div id="errSummary"></div></div>
+    </div>
+    <div class="card"><h3>Logged errors</h3>
+      <label for="x-filter">Filter by category</label><select id="x-filter" style="max-width:260px;margin-bottom:.6rem"><option value="">All categories</option></select><div id="errList"></div></div>
+  </section>
+
+  <section class="view" id="v-progress" hidden aria-labelledby="t-pr">
+    <h2 id="t-pr">Progress Tracker</h2><div id="progBox"></div>
+  </section>
+  </main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY="catprepai.v1",SEC={varc:{n:"VARC",max:72,c:"#2563eb"},dilr:{n:"DILR",max:66,c:"#0891b2"},quant:{n:"Quant",max:60,c:"#7c3aed"}};
+var CATS=["Concept gap","Calculation mistake","Misreading","Poor question selection","Time management"];
+var CH={time:"Time management",acc:"Careless errors",concept:"Weak concepts",select:"Question/set selection",rc:"Reading speed and RC",stress:"Pressure handling"};
+var CHADV={time:"Set a per-question time cap (about 2 minutes in VARC and Quant, 20 to 25 minutes for a DILR set) and practise leaving questions when you hit it.",acc:"Write down intermediate steps and re-read the question before marking. In review, count how many lost marks were avoidable.",concept:"Pick your two weakest topics from the error log and revise them from a single source before attempting more mocks.",select:"Spend the first 3 to 5 minutes of DILR scanning all sets and start with the most approachable. In Quant, skip any question that needs more than a minute to find a method.",rc:"Read one editorial or long article daily, then summarise each paragraph in one line. Time your RC passages.",stress:"Take mocks at your real exam slot and follow a fixed opening routine for each section. Review what you did in the last 10 minutes of each section."};
+var SECADV={varc:"Alternate timed RC passages with Verbal Ability sets (para-summary, parajumbles, odd-one-out). After each RC, justify why each wrong option is wrong.",dilr:"Solve one set untimed first to learn the structure, then repeat under a 25-minute limit. Write down how you chose or rejected sets.",quant:"Drill your weakest topic in batches of 15 questions, then take a mixed timed set. Keep a formula and method sheet from your mistakes."};
+var $=function(s,r){return(r||document).querySelector(s)},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var uid=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)};
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function fmt(s){var d=new Date(s+"T00:00:00");return isNaN(d)?s:d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}
+
+function demo(){
+  var m=function(i,n,d,v,l,q,c,h){return{id:"demo-m"+i,name:n,date:d,varc:v,dilr:l,quant:q,chal:c,hours:h,demo:true}};
+  var e=function(i,q,s,t,c,tm,a){return{id:"demo-e"+i,q:q,sec:s,topic:t,cat:c,time:tm,action:a,demo:true}};
+  return{mocks:[m(1,"Sample Mock 1","2026-08-16",34,18,30,"time",3),m(2,"Sample Mock 2","2026-09-06",39,22,36,"acc",3),m(3,"Sample Mock 3","2026-09-27",42,25,40,"select",3.5),m(4,"Sample Mock 4","2026-10-18",45,28,45,"concept",3.5)],
+  errors:[e(1,14,"quant","Geometry","Concept gap",4,"Revise triangle similarity and solve 10 problems"),e(2,22,"quant","Arithmetic","Calculation mistake",2.5,"Write each step; verify units"),e(3,9,"varc","RC inference","Misreading",3,"Underline qualifiers like 'only' and 'most'"),e(4,31,"dilr","Arrangements set","Poor question selection",18,"Scan all sets first; skip sets with 5+ variables"),e(5,40,"dilr","Games and tournaments","Time management",15,"Fix a 25-minute cap per set"),e(6,18,"quant","Algebra","Concept gap",5,"Redo inequality and modulus chapter")],
+  done:{}};
+}
+var S=load();
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.mocks&&o.errors)return o.done?o:Object.assign(o,{done:{}})}}catch(e){}return demo()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Storage is unavailable, so changes won't persist after refresh.")}}
+var tt;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("on")},3200)}
+var total=function(m){return m.varc+m.dilr+m.quant},pc=function(m,k){return m[k]/SEC[k].max};
+function sorted(){return S.mocks.slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0})}
+function latest(){var s=sorted();return s[s.length-1]}
+function lowest(m){return Object.keys(SEC).reduce(function(a,k){return pc(m,k)<pc(m,a)?k:a},"varc")}
+var STATE={sel:null,series:{varc:1,dilr:1,quant:1,total:1},cmp:[null,null]};
+
+/* navigation */
+function go(v){$$(".view").forEach(function(s){s.hidden=s.id!=="v-"+v});$$("nav button").forEach(function(b){if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  ({dash:rDash,analysis:rAnalysis,plan:rPlan,errors:rErrors,progress:rProgress})[v]();location.hash=v;window.scrollTo(0,0);$("#main").focus({preventScroll:true})}
+function showApp(v){$("#landing").hidden=true;$("#app").hidden=false;go(v||"dash")}
+
+/* dashboard */
+function planTasks(){var m=latest();return m?buildPlan(m):[]}
+function rDash(){
+  var m=latest(),tasks=planTasks(),dn=tasks.filter(function(t){return S.done[today()+"|"+t.id]}).length,pctDone=tasks.length?Math.round(dn/tasks.length*100):0;
+  var hasDemo=S.mocks.some(function(x){return x.demo})||S.errors.some(function(x){return x.demo});
+  $("#demoNote").innerHTML=hasDemo?'<div class="note"><span class="tag">Illustrative demo data</span> Sample mocks and errors are made up to show how the app works. They are not real results. Replace or clear them anytime from the buttons below.</div>':"";
+  $("#stats").innerHTML=
+   '<div class="card"><div class="mut">Latest mock score</div><div class="stat">'+(m?total(m)+' <small>/ 198</small>':"–")+'</div><div class="mut">'+(m?esc(m.name):"No mocks yet")+'</div></div>'+
+   '<div class="card"><div class="mut">Mocks analysed</div><div class="stat">'+S.mocks.length+'</div><div class="mut">'+S.errors.length+' errors logged</div></div>'+
+   '<div class="card"><div class="mut">Today\'s tasks done</div><div class="stat">'+pctDone+'<small>%</small></div><div class="bar" role="progressbar" aria-valuenow="'+pctDone+'" aria-valuemin="0" aria-valuemax="100" aria-label="Daily task completion"><i style="width:'+pctDone+'%"></i></div></div>'+
+   '<div class="card"><div class="mut">Lowest section (latest)</div><div class="stat">'+(m?SEC[lowest(m)].n:"–")+'</div><div class="mut">Based on % of section maximum</div></div>';
+}
+
+/* analysis */
+function rAnalysis(){
+  var m=S.mocks.filter(function(x){return x.id===STATE.sel})[0]||latest();
+  $("#result").innerHTML=m?resultHTML(m):'<div class="card"><div class="empty">No analysis yet. Enter your scores and press Save and analyse.<br><button class="btn" style="margin-top:.6rem" data-act="loadDemo">Load sample data</button></div></div>';
+  var l=sorted().reverse();
+  $("#mockList").innerHTML=l.length?l.map(function(x){return'<div class="item"><div><b>'+esc(x.name)+'</b> '+(x.demo?'<span class="tag">Sample</span>':"")+'<br><span class="mut">'+fmt(x.date)+' · V '+x.varc+' · D '+x.dilr+' · Q '+x.quant+' · Total '+total(x)+'/198</span></div><div class="acts"><button class="btn sm" data-act="view" data-id="'+x.id+'">View</button><button class="btn sm" data-act="edit" data-id="'+x.id+'">Edit</button><button class="btn sm dng" data-act="del" data-id="'+x.id+'">Delete</button></div></div>'}).join(""):'<div class="empty">No saved mocks yet.</div>';
+}
+function resultHTML(m){
+  var lo=lowest(m),ks=Object.keys(SEC),t=total(m);
+  var bars=ks.map(function(k){var p=Math.round(pc(m,k)*100);return'<div class="row"><b>'+SEC[k].n+'</b><div class="bar" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100" aria-label="'+SEC[k].n+' score"><i class="'+(k===lo?"low":"")+'" style="width:'+p+'%"></i></div><span>'+m[k]+'/'+SEC[k].max+' ('+p+'%)</span></div>'}).join("");
+  var recs=[];
+  var ph=pc(m,lo);
+  recs.push("<b>Start with "+SEC[lo].n+".</b> It's your lowest section at "+Math.round(ph*100)+"% of its maximum. "+SECADV[lo]);
+  var hi=ks.reduce(function(a,k){return pc(m,k)>pc(m,a)?k:a},"varc");
+  if(pc(m,hi)-ph<.08)recs.push("Your sections are fairly even, so keep a balanced split rather than over-investing in one.");
+  else recs.push("Protect "+SEC[hi].n+" with short timed sets a few times a week while you fix "+SEC[lo].n+".");
+  recs.push("<b>"+CH[m.chal]+":</b> "+CHADV[m.chal]);
+  recs.push(m.hours<2?"With "+m.hours+" h a day, do 1 focused block on the weakest section and a short revision block, and take a full mock only weekly.":m.hours>=4?"With "+m.hours+" h a day, add one full sectional test each week and keep time for error review. Reviewing is worth as much as solving.":"With "+m.hours+" h a day, rotate sections and keep roughly 15 to 20% of time for revising your error log.");
+  var s=sorted(),i=s.findIndex(function(x){return x.id===m.id});
+  if(i>0){var d=t-total(s[i-1]);recs.push("Compared with "+esc(s[i-1].name)+", your total is "+(d>=0?"up ":"down ")+Math.abs(d)+" marks. One mock can swing for many reasons, so look at several.")}
+  return'<div class="card fade"><h3>'+esc(m.name)+(m.demo?' <span class="tag">Illustrative sample</span>':"")+'</h3><p class="mut">'+fmt(m.date)+'</p><div class="stat">'+t+' <small>/ 198</small></div>'+bars+
+   '<p><b>Lowest section:</b> '+SEC[lo].n+'</p><h3>Recommendations</h3><ul class="rec">'+recs.map(function(r){return"<li>"+r+"</li>"}).join("")+'</ul><p class="mut" style="font-size:.85rem;margin:0">These are study suggestions from scores and your chosen challenge. Section scores can\'t reliably diagnose every mistake or predict a CAT percentile.</p></div>';
+}
+function calcTotal(){var s=0;["varc","dilr","quant"].forEach(function(k){var v=parseFloat($("#f-"+k).value);if(!isNaN(v))s+=v});$("#f-total").textContent=s}
+function setErr(id,msg){var el=$("#e-"+id);if(el)el.textContent=msg||"";var inp=$("#f-"+id)||$("#"+id.replace(/^x/,"x-"));if(inp){if(msg)inp.setAttribute("aria-invalid","true");else inp.removeAttribute("aria-invalid")}}
+function intIn(id,max){var r=$("#f-"+id).value.trim(),v=Number(r);if(r==="")return"Enter a score.";if(!Number.isInteger(v)||v<0||v>max)return"Enter a whole number from 0 to "+max+".";return""}
+function mockSubmit(ev){
+  ev.preventDefault();var er={};
+  var n=$("#f-name").value.trim();if(!n)er.name="Enter a mock name.";
+  var d=$("#f-date").value;if(!d)er.date="Choose the test date.";else if(d>today())er.date="Test date can't be in the future.";
+  ["varc","dilr","quant"].forEach(function(k){var m=intIn(k,SEC[k].max);if(m)er[k]=m});
+  if(!$("#f-chal").value)er.chal="Select your biggest challenge.";
+  var h=Number($("#f-hours").value);if($("#f-hours").value===""||isNaN(h)||h<.5||h>12)er.hours="Enter hours from 0.5 to 12.";
+  ["name","date","varc","dilr","quant","chal","hours"].forEach(function(k){setErr(k,er[k])});
+  var bad=Object.keys(er);if(bad.length){$("#f-"+bad[0]).focus();toast("Please fix the highlighted fields.");return}
+  var id=$("#f-id").value,o={id:id||uid(),name:n,date:d,varc:+$("#f-varc").value,dilr:+$("#f-dilr").value,quant:+$("#f-quant").value,chal:$("#f-chal").value,hours:h};
+  if(id){S.mocks=S.mocks.map(function(x){return x.id===id?o:x})}else S.mocks.push(o);
+  STATE.sel=o.id;save();resetForm();rAnalysis();toast(id?"Mock updated.":"Mock saved and analysed.");$("#result").scrollIntoView({behavior:"smooth"})}
+function resetForm(){$("#mockForm").reset();$("#f-id").value="";$("#mfTitle").textContent="Add a mock";$("#mfSave").textContent="Save and analyse";$("#mfCancel").hidden=true;calcTotal();["name","date","varc","dilr","quant","chal","hours"].forEach(function(k){setErr(k,"")})}
+function editMock(id){var m=S.mocks.filter(function(x){return x.id===id})[0];if(!m)return;
+  $("#f-id").value=m.id;$("#f-name").value=m.name;$("#f-date").value=m.date;$("#f-varc").value=m.varc;$("#f-dilr").value=m.dilr;$("#f-quant").value=m.quant;$("#f-chal").value=m.chal;$("#f-hours").value=m.hours;
+  $("#mfTitle").textContent="Edit mock";$("#mfSave").textContent="Update mock";$("#mfCancel").hidden=false;calcTotal();$("#f-name").focus();$("#mockForm").scrollIntoView({behavior:"smooth"})}
+
+/* plan */
+function topTopic(sec){var c={};S.errors.filter(function(e){return e.sec===sec}).forEach(function(e){c[e.topic]=(c[e.topic]||0)+1});var k=Object.keys(c).sort(function(a,b){return c[b]-c[a]});return k[0]||""}
+function buildPlan(m){
+  var mins=Math.round(m.hours*60),w={},sum=0,ks=Object.keys(SEC);
+  ks.forEach(function(k){w[k]=.2+(1-pc(m,k))*.6;sum+=w[k]});
+  var rev=S.errors.length?.18:.1,share=1-rev,lo=lowest(m),tasks=[];
+  var cap=function(x){return Math.max(10,Math.round(x/5)*5)};
+  var tpl={varc:function(f){return"Do "+(f?"2":"1")+" timed RC passage"+(f?"s":"")+" (about 20 minutes each) and one Verbal Ability set. Review every wrong option."},
+   dilr:function(){return"Solve one DILR set in 25 minutes, then re-solve what you missed untimed. Note why you picked that set."},
+   quant:function(){return"Do a topic drill of 12 to 15 questions, then 5 mixed questions against the clock. Log every miss."}};
+  ks.forEach(function(k){var t=cap(mins*share*w[k]/sum),tp=topTopic(k),big=k===lo;
+    var d=tpl[k](mins>=150&&big);if(tp)d+=" Focus topic from your error log: "+tp+".";if(big)d+=" This is your weakest section, so give it your sharpest hours.";
+    tasks.push({id:k,sec:k,title:SEC[k].n+(big?" (priority)":""),mins:t,desc:d})});
+  var rv=cap(mins*rev),cat=topCat();
+  tasks.push({id:"rev",sec:"rev",title:"Mock-error revision",mins:rv,desc:S.errors.length?"Re-attempt 5 to 8 questions from your error log without looking at solutions"+(cat?", starting with '"+cat+"' errors":"")+". Update each corrective action.":"Review your last mock question by question. Log at least 5 errors with a cause for each."});
+  return tasks}
+function topCat(){var c={};S.errors.forEach(function(e){c[e.cat]=(c[e.cat]||0)+1});var k=Object.keys(c).sort(function(a,b){return c[b]-c[a]});return k[0]||""}
+function rPlan(){
+  var m=latest();if(!m){$("#planBox").innerHTML='<div class="card"><div class="empty">Add a mock first. Your plan is built from your latest scores, challenge and study hours.<br><button class="btn pri" style="margin-top:.6rem" data-view="analysis">Add a mock</button></div></div>';return}
+  var ts=buildPlan(m),dn=ts.filter(function(t){return S.done[today()+"|"+t.id]}).length,p=Math.round(dn/ts.length*100);
+  $("#planBox").innerHTML='<div class="card"><p class="mut">Based on <b>'+esc(m.name)+'</b>'+(m.demo?' <span class="tag">Illustrative sample</span>':"")+' · '+m.hours+' h/day · challenge: '+CH[m.chal]+' · '+fmt(today())+'</p>'+
+   '<div class="row" style="grid-template-columns:1fr 120px"><div class="bar" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100" aria-label="Plan completion"><i style="width:'+p+'%"></i></div><b>'+dn+'/'+ts.length+' done ('+p+'%)</b></div></div>'+
+   ts.map(function(t){var c=!!S.done[today()+"|"+t.id];return'<div class="task'+(c?" done":"")+'"><input type="checkbox" id="tk-'+t.id+'" data-task="'+t.id+'"'+(c?" checked":"")+'><label for="tk-'+t.id+'" style="margin:0;font-weight:400"><b class="t">'+esc(t.title)+' · '+t.mins+' min</b><br><span class="mut">'+esc(t.desc)+'</span></label></div>'}).join("")+
+   '<p class="mut" style="font-size:.85rem">Time is split by how far each section is from its maximum, with extra reserved for error revision. Adjust it to how you feel on the day.</p>'}
+
+/* errors */
+function rErrors(){
+  var f=$("#x-filter").value,l=S.errors.filter(function(e){return!f||e.cat===f}),sec={varc:"VARC",dilr:"DILR",quant:"Quant"};
+  $("#errList").innerHTML=l.length?l.slice().reverse().map(function(e){return'<div class="item"><div><b>Q'+e.q+' · '+sec[e.sec]+' · '+esc(e.topic)+'</b> '+(e.demo?'<span class="tag">Sample</span>':"")+'<br><span class="mut">'+esc(e.cat)+' · '+e.time+' min</span><br>Fix: '+esc(e.action)+'</div><div class="acts"><button class="btn sm dng" data-act="delErr" data-id="'+e.id+'" aria-label="Delete error for question '+e.q+'">Delete</button></div></div>'}).join(""):'<div class="empty">'+(S.errors.length?"No errors in this category.":"No errors logged yet. Add the mistakes from your last mock to spot patterns.")+'</div>';
+  $("#errSummary").innerHTML=errBars()}
+function errBars(){
+  if(!S.errors.length)return'<div class="empty">Patterns will appear after you log errors.</div>';
+  var mx=0,c=CATS.map(function(k){var n=S.errors.filter(function(e){return e.cat===k}).length;mx=Math.max(mx,n);return[k,n]});
+  return c.map(function(x){return'<div class="row" style="grid-template-columns:130px 1fr 30px"><span style="font-size:.88rem">'+x[0]+'</span><div class="bar"><i style="width:'+(mx?x[1]/mx*100:0)+'%"></i></div><b>'+x[1]+'</b></div>'}).join("")}
+function errSubmit(ev){
+  ev.preventDefault();var er={},q=$("#x-q").value.trim(),qn=Number(q),tm=$("#x-time").value.trim(),tv=Number(tm);
+  if(q===""||!Number.isInteger(qn)||qn<1||qn>100)er.xq="Enter a question number from 1 to 100.";
+  if(!$("#x-sec").value)er.xsec="Select a section.";
+  if(!$("#x-topic").value.trim())er.xtopic="Enter the topic.";
+  if(!$("#x-cat").value)er.xcat="Select an error category.";
+  if(tm===""||isNaN(tv)||tv<0||tv>60)er.xtime="Enter minutes from 0 to 60.";
+  if(!$("#x-act").value.trim())er.xact="Describe the corrective action.";
+  var map={xq:"x-q",xsec:"x-sec",xtopic:"x-topic",xcat:"x-cat",xtime:"x-time",xact:"x-act"};
+  Object.keys(map).forEach(function(k){$("#e-"+k).textContent=er[k]||"";var i=$("#"+map[k]);if(er[k])i.setAttribute("aria-invalid","true");else i.removeAttribute("aria-invalid")});
+  var b=Object.keys(er);if(b.length){$("#"+map[b[0]]).focus();toast("Please fix the highlighted fields.");return}
+  S.errors.push({id:uid(),q:qn,sec:$("#x-sec").value,topic:$("#x-topic").value.trim(),cat:$("#x-cat").value,time:tv,action:$("#x-act").value.trim()});
+  save();$("#errForm").reset();rErrors();toast("Error added to your log.")}
+
+/* progress */
+function rProgress(){
+  var s=sorted(),b=$("#progBox");
+  if(!s.length){b.innerHTML='<div class="card"><div class="empty">Save at least one mock to see charts.<br><button class="btn pri" style="margin-top:.6rem" data-view="analysis">Add a mock</button></div></div>';return}
+  var all=Object.keys(S.done).filter(function(k){return S.done[k]}).length,first=s[0],last=s[s.length-1],d=total(last)-total(first);
+  var hasDemo=s.some(function(x){return x.demo});
+  var opts=function(i){return s.map(function(m){return'<option value="'+m.id+'"'+(STATE.cmp[i]===m.id?" selected":"")+'>'+esc(m.name)+'</option>'}).join("")};
+  if(!STATE.cmp[0]||!s.some(function(m){return m.id===STATE.cmp[0]}))STATE.cmp=[s[Math.max(0,s.length-2)].id,last.id];
+  b.innerHTML=(hasDemo?'<div class="note"><span class="tag">Illustrative demo data</span> Charts include sample mocks that are not real results.</div>':"")+
+   '<div class="grid g4"><div class="card"><div class="mut">Score trend</div><div class="stat">'+(d>=0?"+":"")+d+'</div><div class="mut">'+(s.length>1?"marks from first to latest mock":"Add more mocks to see a trend")+'</div></div>'+
+   '<div class="card"><div class="mut">Tasks completed</div><div class="stat">'+all+'</div><div class="mut">across all days</div></div>'+
+   '<div class="card"><div class="mut">Errors logged</div><div class="stat">'+S.errors.length+'</div><div class="mut">Top: '+(topCat()||"none yet")+'</div></div>'+
+   '<div class="card"><div class="mut">Best total</div><div class="stat">'+Math.max.apply(null,s.map(total))+'<small> /198</small></div></div></div>'+
+   '<div class="card"><h3>Sectional scores across mocks</h3><p class="mut" style="font-size:.9rem">Shown as % of each section\'s maximum. Hover, focus or tap a point for details. Use the buttons to show or hide lines.</p><div class="leg" id="leg"></div><div class="chartbox" id="chart"></div></div>'+
+   '<div class="grid g2"><div class="card"><h3>Recurring error categories</h3>'+errBars()+'</div>'+
+   '<div class="card"><h3>Compare two mocks</h3><div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem"><div><label for="cA">First</label><select id="cA">'+opts(0)+'</select></div><div><label for="cB">Second</label><select id="cB">'+opts(1)+'</select></div></div><div class="sc" id="cmpOut"></div></div></div>';
+  var colors={varc:SEC.varc.c,dilr:SEC.dilr.c,quant:SEC.quant.c,total:"#0f1b3d"},names={varc:"VARC",dilr:"DILR",quant:"Quant",total:"Total"};
+  $("#leg").innerHTML=Object.keys(names).map(function(k){return'<button data-ser="'+k+'" aria-pressed="'+!!STATE.series[k]+'" style="border-color:'+colors[k]+'">'+names[k]+'</button>'}).join("");
+  drawChart(s,colors,names);cmp()}
+function drawChart(s,colors,names){
+  var W=640,H=270,L=40,R=16,T=14,B=44,n=s.length,x=function(i){return n===1?W/2:L+i*(W-L-R)/(n-1)},y=function(v){return T+(1-v)*(H-T-B)};
+  var o='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Line chart of sectional score percentages across mocks">';
+  [0,.25,.5,.75,1].forEach(function(g){o+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(g)+'" y2="'+y(g)+'" stroke="#e3e8f1"/><text x="'+(L-6)+'" y="'+(y(g)+4)+'" font-size="11" text-anchor="end" fill="#5b6478">'+g*100+'%</text>'});
+  s.forEach(function(m,i){var nm=m.name.length>12?m.name.slice(0,11)+"…":m.name;o+='<text x="'+x(i)+'" y="'+(H-22)+'" font-size="11" text-anchor="middle" fill="#5b6478">'+esc(nm)+'</text><text x="'+x(i)+'" y="'+(H-8)+'" font-size="10" text-anchor="middle" fill="#8892a6">'+fmt(m.date).replace(/,? \d{4}$/,"")+'</text>'});
+  Object.keys(names).forEach(function(k){if(!STATE.series[k])return;
+    var v=function(m){return k==="total"?total(m)/198:pc(m,k)};
+    o+='<polyline fill="none" stroke="'+colors[k]+'" stroke-width="2.5"'+(k==="total"?' stroke-dasharray="6 4"':"")+' points="'+s.map(function(m,i){return x(i)+","+y(v(m))}).join(" ")+'"/>';
+    s.forEach(function(m,i){var raw=k==="total"?total(m)+"/198":m[k]+"/"+SEC[k].max;o+='<circle class="pt" tabindex="0" r="5" cx="'+x(i)+'" cy="'+y(v(m))+'" fill="#fff" stroke="'+colors[k]+'" stroke-width="2.5" data-tip="'+esc(names[k]+" · "+m.name+": "+raw+" ("+Math.round(v(m)*100)+"%)")+'"><title>'+esc(names[k]+" · "+m.name+": "+raw)+'</title></circle>'})});
+  $("#chart").innerHTML=o+'</svg><div id="ctip"></div>'}
+function cmp(){
+  var A=S.mocks.filter(function(m){return m.id===$("#cA").value})[0],B=S.mocks.filter(function(m){return m.id===$("#cB").value})[0];if(!A||!B)return;STATE.cmp=[A.id,B.id];
+  var rows=Object.keys(SEC).map(function(k){return[SEC[k].n,A[k],B[k],SEC[k].max]});rows.push(["Total",total(A),total(B),198]);
+  $("#cmpOut").innerHTML='<table><caption class="mut" style="text-align:left;padding:.5rem 0">Change is second minus first</caption><thead><tr><th>Section</th><th>'+esc(A.name)+'</th><th>'+esc(B.name)+'</th><th>Change</th></tr></thead><tbody>'+rows.map(function(r){var d=r[2]-r[1];return'<tr><td>'+r[0]+'</td><td>'+r[1]+'/'+r[3]+'</td><td>'+r[2]+'/'+r[3]+'</td><td style="color:'+(d>0?"var(--ok)":d<0?"var(--bad)":"var(--mut)")+';font-weight:700">'+(d>0?"+":"")+d+'</td></tr>'}).join("")+'</tbody></table>'}
+
+/* events */
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-view],[data-act],[data-ser]");if(!t)return;
+  if(t.dataset.view)return go(t.dataset.view);
+  if(t.dataset.ser){STATE.series[t.dataset.ser]=STATE.series[t.dataset.ser]?0:1;return rProgress()}
+  var a=t.dataset.act,id=t.dataset.id;
+  if(a==="start")showApp("dash");
+  else if(a==="home"){$("#app").hidden=true;$("#landing").hidden=false;location.hash="";window.scrollTo(0,0)}
+  else if(a==="view"){STATE.sel=id;rAnalysis();$("#result").scrollIntoView({behavior:"smooth"})}
+  else if(a==="edit")editMock(id);
+  else if(a==="del"){var m=S.mocks.filter(function(x){return x.id===id})[0];if(m&&confirm('Delete "'+m.name+'"? This cannot be undone.')){S.mocks=S.mocks.filter(function(x){return x.id!==id});save();rAnalysis();toast("Mock deleted.")}}
+  else if(a==="delErr"){S.errors=S.errors.filter(function(x){return x.id!==id});save();rErrors();toast("Error removed.")}
+  else if(a==="resetDemo"){if(confirm("Replace all your data with the illustrative demo data?")){S=demo();STATE.sel=null;save();rDash();toast("Demo data restored.")}}
+  else if(a==="clearAll"){if(confirm("Delete all mocks, errors and task progress from this browser?")){S={mocks:[],errors:[],done:{}};STATE.sel=null;save();rDash();toast("All data cleared.")}}
+  else if(a==="loadDemo"){S=demo();save();rAnalysis();toast("Demo data loaded. It's illustrative, not real.")}
+});
+document.addEventListener("change",function(e){
+  var t=e.target;
+  if(t.dataset.task){S.done[today()+"|"+t.dataset.task]=t.checked;save();rPlan();toast(t.checked?"Task completed.":"Task marked not done.");var c=$("#tk-"+t.dataset.task);if(c)c.focus()}
+  else if(t.id==="x-filter")rErrors();else if(t.id==="cA"||t.id==="cB")cmp()});
+function tip(e){var p=e.target.closest(".pt"),c=$("#ctip");if(!p||!c)return;var b=$("#chart").getBoundingClientRect(),r=p.getBoundingClientRect();c.textContent=p.dataset.tip;c.style.display="block";c.style.left=Math.min(Math.max(r.left-b.left-40,0),Math.max(0,b.width-c.offsetWidth))+"px";c.style.top=(r.top-b.top-34)+"px"}
+document.addEventListener("mouseover",tip);document.addEventListener("focusin",tip);
+document.addEventListener("mouseout",function(e){var c=$("#ctip");if(c&&e.target.closest&&e.target.closest(".pt"))c.style.display="none"});
+document.addEventListener("focusout",function(){var c=$("#ctip");if(c)c.style.display="none"});
+$("#mockForm").addEventListener("submit",mockSubmit);$("#errForm").addEventListener("submit",errSubmit);
+$("#mfCancel").addEventListener("click",function(){resetForm();toast("Edit cancelled.")});
+["varc","dilr","quant"].forEach(function(k){$("#f-"+k).addEventListener("input",calcTotal)});
+CATS.forEach(function(c){["#x-cat","#x-filter"].forEach(function(s){var o=document.createElement("option");o.value=o.textContent=c;$(s).appendChild(o)})});
+$("#f-date").max=today();
+var h=location.hash.slice(1);if(["dash","analysis","plan","errors","progress"].indexOf(h)>-1)showApp(h);
+})();
+</script>
+</body>
+</html>
